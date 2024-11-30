@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kalkulator Distribusi Poisson</title>
+    <link href="https://cdn.jsdelivr.net/npm/modern-normalize@2.0.0/modern-normalize.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f4f7f6;
+            --text-primary: #2c3e50;
+            --accent-color: #3498db;
+            --border-radius: 8px;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .result-box {
+            background-color: var(--bg-primary);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .calculation-steps {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .copyright {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 1.5rem;">Kalkulator Distribusi Poisson</h1>
+        
+        <div class="input-group">
+            <label for="lambda">Lambda (λ)</label>
+            <input type="number" id="lambda" placeholder="Rata-rata kejadian" step="0.1">
+        </div>
+        
+        <div class="input-group">
+            <label for="k">Jumlah Kejadian (k)</label>
+            <input type="number" id="k" placeholder="Jumlah kejadian">
+        </div>
+        
+        <button onclick="hitungProbabilitasPoisson()" class="btn">Hitung Probabilitas</button>
+        
+        <div id="error" style="color: red; text-align: center; margin-top: 1rem;"></div>
+        
+        <div id="result" class="result-box" style="display: none;">
+            <h3>Hasil Perhitungan</h3>
+            <p id="resultLambda"></p>
+            <p id="resultK"></p>
+            <p id="resultProbabilitas"></p>
+        </div>
+        
+        <div id="detailCalculation" class="calculation-steps" style="display: none;">
+            <h3>Detail Perhitungan</h3>
+            <div id="calculationSteps"></div>
+        </div>
+
+        <div class="copyright">
+            © 2024 Dibuat oleh @rrafifnanda
+        </div>
+    </div>
+
+    <script>
+        // [Script yang sama seperti pada versi sebelumnya]
+        function faktorial(n) {
+            if (n === 0 || n === 1) return 1;
+            return n * faktorial(n - 1);
+        }
+
+        function hitungProbabilitasPoisson() {
+            const lambdaInput = document.getElementById('lambda');
+            const kInput = document.getElementById('k');
+            const errorDiv = document.getElementById('error');
+            const resultDiv = document.getElementById('result');
+            const detailCalculationDiv = document.getElementById('detailCalculation');
+            const calculationStepsDiv = document.getElementById('calculationSteps');
+
+            // Reset tampilan
+            errorDiv.innerHTML = '';
+            resultDiv.style.display = 'none';
+            detailCalculationDiv.style.display = 'none';
+
+            const lambdaNum = parseFloat(lambdaInput.value);
+            const kNum = parseInt(kInput.value);
+
+            // Validasi input
+            if (isNaN(lambdaNum) || isNaN(kNum) || lambdaNum < 0 || kNum < 0) {
+                errorDiv.innerHTML = 'Masukkan lambda dan k dengan benar. Keduanya harus bilangan positif.';
+                return;
+            }
+
+            // Perhitungan
+            const lambdaPangkatK = Math.pow(lambdaNum, kNum);
+            const exponentialTerm = Math.exp(-lambdaNum);
+            const faktorialK = faktorial(kNum);
+            const probabilitas = (lambdaPangkatK * exponentialTerm) / faktorialK;
+
+            // Tampilkan hasil
+            document.getElementById('resultLambda').textContent = `Lambda (λ): ${lambdaNum}`;
+            document.getElementById('resultK').textContent = `Jumlah Kejadian (k): ${kNum}`;
+            document.getElementById('resultProbabilitas').innerHTML = 
+                `Probabilitas: ${(probabilitas * 100).toFixed(4)}% 
+                <span style="font-size: 0.8rem; color: #7f8c8d;">(kemungkinan terjadinya ${kNum} kejadian)</span>`;
+
+            // Detail perhitungan
+            const steps = [
+                {
+                    judul: "1. Rumus Distribusi Poisson",
+                    deskripsi: "P(X = k) = (e^-λ * λ^k) / k!"
+                },
+                {
+                    judul: "2. Hitung λ^k",
+                    deskripsi: `λ^k = ${lambdaNum}^${kNum} = ${lambdaPangkatK.toFixed(4)}`
+                },
+                {
+                    judul: "3. Hitung e^-λ",
+                    deskripsi: `e^-λ = e^-(${lambdaNum}) = ${exponentialTerm.toFixed(4)}`
+                },
+                {
+                    judul: "4. Hitung k!",
+                    deskripsi: `${kNum}! = ${faktorialK}`
+                },
+                {
+                    judul: "5. Masukkan ke Rumus",
+                    deskripsi: `P(X = ${kNum}) = (${lambdaPangkatK.toFixed(4)} * ${exponentialTerm.toFixed(4)}) / ${faktorialK}`
+                },
+                {
+                    judul: "6. Hasil Akhir",
+                    deskripsi: `Probabilitas = ${(probabilitas * 100).toFixed(4)}%`
+                }
+            ];
+
+            calculationStepsDiv.innerHTML = steps.map((step, index) => `
+                <div style="background-color: #f9f9f9; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0 0 0.5rem 0; font-weight: 600;">${step.judul}</h4>
+                    <p style="margin: 0; color: #444;">${step.deskripsi}</p>
+                </div>
+            `).join('');
+
+            // Tampilkan hasil dan detail
+            resultDiv.style.display = 'block';
+            detailCalculationDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
